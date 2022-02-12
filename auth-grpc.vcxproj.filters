@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="src">
+      <UniqueIdentifier>{a4677def-0ab5-45a8-8674-00dbded33613}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\stubs">
+      <UniqueIdentifier>{a66760f0-840c-4f7b-abf4-82295ba5d5d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cmake">
+      <UniqueIdentifier>{6ff8ba9b-6639-4ffb-901a-c768ea65cd65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\common">
+      <UniqueIdentifier>{fff8f102-1c75-4646-a029-26a5aad4d64c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stubs\agentcontrol.grpc.pb.cc">
+      <Filter>src\stubs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stubs\agentcontrol.pb.cc">
+      <Filter>src\stubs</Filter>
+    </ClCompile>
+    <ClCompile Include="src\common\arg-list.cpp">
+      <Filter>src\common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="CMakeLists.txt" />
+    <Text Include="cmake\CMakeLists.txt">
+      <Filter>cmake</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\stubs\agentcontrol.grpc.pb.h">
+      <Filter>src\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stubs\agentcontrol.pb.h">
+      <Filter>src\stubs</Filter>
+    </ClInclude>
+    <ClInclude Include="src\common\arg-list.h">
+      <Filter>src\common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="build-stubs.bat" />
+  </ItemGroup>
+</Project>

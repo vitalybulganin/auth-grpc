@@ -1,0 +1,198 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+// import "wrappers.proto";
+
+package Avanpost.Sso.Agent.Grpc;
+option go_package = "agentcontrol";
+
+service AgentControl {
+    rpc GetUserApplications(UserRequest) returns (UserApplicationsResponse);                            // список приложений закрепленных за пользователем
+    rpc CreateSubscriptionChannel(stream AgentChannelMessage) returns (stream ServerChannelMessage);    // подписка на серверные сообщения
+    rpc GetFactorList(UserRequest) returns (FactorListResponse);                                        // список факторов пользователя
+    rpc FactorBinding(FactorBindingRequest) returns (Result);                                           // опреции с фактором аутентификации
+    rpc GetTemporaryAuthCode(TemporaryAuthCodeRequest) returns (TemporaryAuthCodeResponse);
+    rpc Authenticate(AuthenticationRequest) returns (AuthenticationResponse);
+    rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);    
+    rpc CreateSession(SessionRequest) returns (SessionResponse);
+    rpc SetUserCredential(SetUserCredentialRequest) returns (SetUserCredentialResponse);
+}
+
+message Result {
+    bool isError = 1;
+    string errorText = 2;
+}
+
+message UserRequest {
+    string username = 1;
+}
+
+message TemporaryAuthCodeRequest {
+    string username = 1; // todo: take username from token
+    string applicationName = 2;
+}
+
+message TemporaryAuthCodeResponse {
+    Result result = 1;
+    string temporaryCode = 2;
+}
+
+message UserApplicationsResponse {
+    Result result = 1;
+    repeated Application applications = 2;
+}
+
+message Application {
+    string applicationID = 1;
+    string applicationName = 2;
+    string commands = 3;
+    bool allowUserManageCredentials = 4;
+    bool serverPasswordGeneration = 5;
+    string passwordPolicy = 6;
+    //<???> google.protobuf.StringValue passwordPolicy = 6;
+}
+
+message UserCredentials {
+    string applicationID = 1;
+    string user = 2;
+    string password = 3;
+    string domain = 4;
+    string comment = 5;
+    string credentialsID = 6;
+}
+
+message AgentChannelMessage {
+    Result result = 1;
+    string username = 2;
+    AuthenticationFactor authenticationFactor = 3;
+}
+
+message AuthenticationFactor {
+    FactorType factor = 1;
+    map<string, string> metadata = 2;
+}
+
+message ServerChannelMessage {
+    AuthenticationFactor authenticationFactor = 1;
+}
+
+message ApplicationFactorRequest {
+    string username = 1;
+    string applicationID = 2;
+}
+
+message FactorListResponse {
+    Result result = 1;
+    repeated AuthenticationFactor factors = 2;
+}
+
+message FactorBindingRequest {
+    string username = 1;
+    AuthenticationFactor authenticationFactor = 2;
+    BindingOperation operation = 3;
+}
+
+enum FactorType {
+    EMPTY = 0; // для запроса идентификации
+    PASSWORD = 1;
+    TOTP = 2;
+    SMS = 3;
+    KERBEROS = 4;
+    SMARTCARD = 5;
+    EMAIL = 6;
+    TELEGRAM = 7;
+    PAYCONTROL = 8;
+}
+
+enum BindingOperation {
+    ADD = 0;
+    UPDATE = 1;
+    REMOVE = 2;
+}
+
+// если на шаге аутентификации есть выбор из нескольких факторов, и пользователь выбрал фактор который требует от
+// пользователя ввод кода (SMS, EMAIL), то для отправки кода на устройство пользователя надо отправить запрос с
+// дополнительным аттрибутом sendinfo=true (request.metadata.Add("sendinfo", "true")), а вторым запросом отправть
+// полученный код на сервер. если на шаге только один возможный фактор то код высылается на устройство автоматически
+message AuthenticationRequest {
+    string username = 1; // логин пользователя
+    string passcode = 2; // опционально, пароль | код смс, totp
+    string state = 3;    // опционально, идентификатор запроса, задается сервером
+    string sessionID = 4; // идентификатор сессии
+    string applicationID = 5; // идентификатор приложения (id/name) в котором проходит аутентификация
+    FactorType factor = 6;  // предъявляемый фактор аутентификации
+    map<string, string> metadata = 7; // опционально, словарь для доп аттрибутов запроса
+}
+
+message AuthenticationResponse {
+    AuthenticationStatus status = 1; // код ответа
+    repeated FactorType factors = 2; // требуемые на шаге аутентификации факторы (предъявляются один из списка)
+    string state = 3; // идентификатор запроса (requestID), задается сервером
+    string sessionID = 5; // идентификатор сессии
+    string token = 6; // опционально, токен выдаваемый в случае AccessAccept
+    map<string, string> metadata = 7; // опционально, словарь для доп аттрибутов ответа
+    repeated UserCredentials credentials = 8; // опционально, учетные данные в запрашиваемом приложении
+    int32 remainingAttemptsCount = 9; // оставшееся количество попыток ввода значения фактора
+}
+
+enum AuthenticationStatus {    
+    AccessReject = 0; // неверный пользователь или пароль
+    AccessAccept = 1; // аутентификация прошла успешно, все необходимые факторы предъявлены
+    AccessChallenge = 2; // требуется предъявить дополнительный фактор, указанный в парметре factors
+    AccountLocked = 3; // учетная запись заблокирована
+    PasswordExpired = 4; // необходимо сменить пароль
+}
+
+message ChangePasswordRequest {
+    string username = 1; // логин пользователя
+    string oldPassword = 2; // старый пароль
+    string newPassword = 3; // новый пароль
+}
+
+message ChangePasswordResponse {
+    ChangePasswordStatus status = 1;
+    string message = 2; // сообщение (причина по которой пароль не изменен)
+}
+
+enum ChangePasswordStatus {
+    PasswordAccept = 0; // новый пароль принят
+    PasswordReject = 1; // новый пароль не принят
+}
+
+message SessionRequest {
+    string username = 1; // fix: use token user association
+    FactorType handledFactor = 2; // password or kerberos
+    string applicationID = 3; // desktop application name or ID
+}
+
+message SessionResponse {
+    Result result = 1;
+    string sessionID = 2;    
+}
+
+message SetUserCredentialRequest {
+    string applicationID = 1;
+    string credentialID = 2;
+    //<???> google.protobuf.StringValue credentialID = 2;
+    string username = 3;
+    PasswordInfo password = 4;
+    string domain = 5;
+    string comment = 6;
+}
+
+message PasswordInfo {
+    string password = 1;
+    string passwordConfirm = 2;
+}
+
+message SetUserCredentialResponse {
+    SetUserCredentialStatus status = 1;
+    PasswordInfo password = 2;
+    string errorText = 3;
+}
+
+enum SetUserCredentialStatus {
+    Accept = 0;
+    Reject = 1;
+    UserMustProvidePassword = 2;
+}

@@ -1,0 +1,1 @@
+"protoc -I C:/Users/vital/projects/auth-grpc/protos/agentcontrol.proto --cpp_out=C:\Users\vital\projects\auth-grpc\src\stubs --grpc_out=C:\Users\vital\projects\auth-grpc\src\stubs --proto_path=C:\Users\vital\projects\auth-grpc\protos --plugin=protoc-gen-grpc=C:\software\grpc\bin\grpc_cpp_plugin.exe agentcontrol.proto" 

@@ -1,0 +1,11 @@
+prefix=C:/Users/vital/projects/grpc/cmake-build-release/dist
+exec_prefix=C:/Users/vital/projects/grpc/cmake-build-release/dist
+libdir=C:/Users/vital/projects/grpc/cmake-build-release/dist/lib
+includedir=C:/Users/vital/projects/grpc/cmake-build-release/dist/include
+
+Name: Protocol Buffers
+Description: Google's Data Interchange Format
+Version: 3.19.2.0
+Libs: -L${libdir} -lprotobuf 
+Cflags: -I${includedir}
+Conflicts: protobuf-lite

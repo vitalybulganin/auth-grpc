@@ -1,0 +1,13 @@
+prefix=C:/Users/vital/projects/grpc/cmake-build-release/dist
+exec_prefix=C:/Users/vital/projects/grpc/cmake-build-release/dist
+libdir=C:/Users/vital/projects/grpc/cmake-build-release/dist/lib
+sharedlibdir=C:/Users/vital/projects/grpc/cmake-build-release/dist/lib
+includedir=C:/Users/vital/projects/grpc/cmake-build-release/dist/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.11
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
